@@ -21,6 +21,20 @@ function createAuthenticatedFetch(username: string, password: string) {
   };
 }
 
+async function loadTrendingKeywords(keyword: string, url: string, username: string, password: string) {
+  const authFetch = createAuthenticatedFetch(username, password);
+  const keywordApi = new client.KeywordsDataApi(url, { fetch: authFetch });
+
+  const task = new client.KeywordsDataGoogleTrendsExploreLiveRequestInfo();
+  task.keywords = [keyword];
+  task.location_name = "United States";
+  task.time_range = "past_7_days";
+
+  const resp = await keywordApi.googleTrendsExploreLive([task]);
+
+  return resp?.toJSON();
+}
+
 async function loadFromDataForSEO(keyword: string, url: string, username: string, password: string) {
   const authFetch = createAuthenticatedFetch(username, password);
   const serpApi = new client.SerpApi(url, { fetch: authFetch });
@@ -100,9 +114,11 @@ function App() {
 
           const response = await loadFromDataForSEO(keyword, "https://api.dataforseo.com", username, password)
 
+          const trendingKeywords = await loadTrendingKeywords(keyword, "https://api.dataforseo.com", username, password)
+          console.log("trendingKeywords: ", trendingKeywords);
+
           // get first 5 Organic Serp results
           const first5OrganicSerpElementItem = response["tasks"][0]["result"][0]["items"].filter((item: never) => item["type"] === "organic").slice(0, 5);
-          console.log("first5OrganicSerpElementItem: ", first5OrganicSerpElementItem);
 
           // Change the text of options by ['url'] of the first 5 Organic Serp results
           setOptions(first5OrganicSerpElementItem.map((item: never) => item["url"]));
