@@ -39,8 +39,6 @@ async function getDataFromTrafilatura(url: string) {
   const response = await fetch(url);
   const data = await response.text();
 
-  console.log(data);
-
   return data;
 }
 
@@ -48,8 +46,18 @@ function App() {
   const [keyword, setKeyword] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-
+  const [selectedOption, setSelectedOption] = useState<string>('');
+  const [options, setOptions] = useState<string[]>([
+    'Option 1',
+    'Option 2',
+    'Option 3',
+    'Option 4'
+  ]);
   const [resp, setResp] = useState('');
+
+  const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSelectedOption(event.target.value);
+  };
 
   return (
     <div>
@@ -84,12 +92,50 @@ function App() {
           />
         </p>
         <button onClick={async () => {
+          // Change the text of options by "waiting..." for the response from DataForSEO
+          setOptions(["waiting...", "waiting...", "waiting...", "waiting...", "waiting..."]);
+
+          // Clear resp
+          setResp('');
+
           const response = await loadFromDataForSEO(keyword, "https://api.dataforseo.com", username, password)
-          const extractUrl = 'http://46.250.232.35:17590/extract-text?url=' + response["tasks"][0]["result"][0]["items"][1]["url"]
+
+          // get first 5 Organic Serp results
+          const first5OrganicSerpElementItem = response["tasks"][0]["result"][0]["items"].filter((item: never) => item["type"] === "organic").slice(0, 5);
+          console.log("first5OrganicSerpElementItem: ", first5OrganicSerpElementItem);
+
+          // Change the text of options by ['url'] of the first 5 Organic Serp results
+          setOptions(first5OrganicSerpElementItem.map((item: never) => item["url"]));
+        }}>
+          Query Google
+        </button>
+        <div className="form-group">
+          <label className="OptionsLabel">Select an Option:</label>
+          <div className="radio-group">
+            {options.map((option, index) => (
+              <div key={index} className="radio-option">
+                <input
+                  type="radio"
+                  id={`option${index + 1}`}
+                  name="option"
+                  value={option}
+                  checked={selectedOption === option}
+                  onChange={handleOptionChange}
+                />
+                <label htmlFor={`option${index + 1}`}>{option}</label>
+              </div>
+            ))}
+          </div>
+        </div>
+        <button onClick={async () => {
+          // set resp to "waiting..."
+          setResp('waiting...');
+
+          const extractUrl = 'http://46.250.232.35:17590/extract-text?url=' + selectedOption
           const resText = await getDataFromTrafilatura(extractUrl)
           setResp(resText)
         }}>
-          Get
+          Extract Text
         </button>
         <p className="response">
           {resp.toString()}
