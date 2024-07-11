@@ -147,7 +147,7 @@ function App() {
           // set resp to "waiting..."
           setResp('waiting...');
 
-          const extractUrl = 'http://46.250.232.35:17590/extract-text?url=' + selectedOption
+          const extractUrl = 'https://api.gettext.online/extract-text?url=' + selectedOption
           const resText = await getDataFromTrafilatura(extractUrl)
           setResp(resText)
         }}>
