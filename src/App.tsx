@@ -27,6 +27,7 @@ async function loadTrendingKeywords(keyword: string, url: string, username: stri
 
   const task = new client.KeywordsDataGoogleTrendsExploreLiveRequestInfo();
   task.keywords = [keyword];
+  task.item_types = ["google_trends_queries_list"];
   task.location_name = "United States";
   task.time_range = "past_7_days";
 
@@ -68,6 +69,9 @@ function App() {
     'Option 4'
   ]);
   const [resp, setResp] = useState('');
+
+  const [locationname, setLocationname] = useState('Vietnam');
+  const [timerange, setTimerange] = useState('past_7_days');
 
   const handleOptionChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedOption(event.target.value);
